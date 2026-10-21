@@ -12,7 +12,7 @@ Windowed=1
 SoundVolume=5
 MusicVolume=5
 [CONNECTION SETTINGS]
-ServerIP=localhost
+ServerIP=play.muorigins.online
 ServerPort=44406
 [UI]
 Locale=en
