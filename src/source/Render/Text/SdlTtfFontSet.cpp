@@ -64,6 +64,22 @@ constexpr bool IsBoldRole(std::size_t role)
     return {};
 }
 
+[[nodiscard]] std::string FindSystemThaiFontPath(bool bold)
+{
+#ifdef _WIN32
+    const char* const candidates[] = {
+        bold ? "C:\\Windows\\Fonts\\tahomabd.ttf" : "C:\\Windows\\Fonts\\tahoma.ttf",
+        bold ? "C:\\Windows\\Fonts\\leelauib.ttf" : "C:\\Windows\\Fonts\\leelawui.ttf",
+    };
+    for (const char* path : candidates)
+    {
+        if (std::filesystem::exists(path))
+            return path;
+    }
+#endif
+    return {};
+}
+
 void CloseTtfFont(TTF_Font*& font)
 {
     if (!font)
@@ -188,6 +204,8 @@ void SdlTtfFontSet::Close()
         for (TTF_Font*& font : fallbacks)
             CloseTtfFont(font);
     }
+    for (TTF_Font*& font : m_systemThaiFallbacks)
+        CloseTtfFont(font);
 }
 
 TTF_Font* SdlTtfFontSet::Get(SdlTtfFontRole role) const
@@ -215,6 +233,20 @@ bool SdlTtfFontSet::Open(std::string_view configuredFamily, const RoleSizes& poi
     for (std::size_t i = 0; i < std::size(kBundledFallbackFonts); ++i)
     {
         if (!OpenFallbacks(kBundledFallbackFonts[i], rolePaths, m_fallbacks[i]))
+            return false;
+    }
+
+    // Windows ships Thai-capable UI fonts. Attach one after the portable
+    // fallbacks so chat input, /post messages and character names render Thai
+    // without redistributing a platform font with the client.
+    for (std::size_t role = 0; role < kRoleCount; ++role)
+    {
+        const std::string path = FindSystemThaiFontPath(IsBoldRole(role));
+        if (path.empty())
+            continue;
+        m_systemThaiFallbacks[role] = TTF_OpenFont(path.c_str(), TTF_GetFontSize(m_primary[role]));
+        if (!m_systemThaiFallbacks[role]
+            || !AttachTtfFallback(m_primary[role], m_systemThaiFallbacks[role], RoleName(role)))
             return false;
     }
     return true;

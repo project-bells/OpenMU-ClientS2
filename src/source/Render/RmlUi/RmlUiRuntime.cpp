@@ -11,6 +11,7 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/FileInterface.h>
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
+#include <filesystem>
 #include "Render/Renderer/MuRenderer.h"
 #include "Core/Utilities/FrameProfiler.h"
 
@@ -104,6 +105,23 @@ void LoadBundledFonts()
     // The native fixed-width face (kBundledFixedFont, BundledFonts.h), for text the original drew
     // with g_hFixFont -- the character list's server messages (server_msg.rcss).
     Rml::LoadFontFace("fonts/Cousine-Regular.ttf");
+
+#ifdef _WIN32
+    // Chat fields are RmlUi controls. Add the Thai-capable Windows UI face as
+    // a fallback so IME text is visible while composing and after submission.
+    if (std::filesystem::exists("C:/Windows/Fonts/tahoma.ttf"))
+    {
+        Rml::LoadFontFace("C:/Windows/Fonts/tahoma.ttf", true);
+        if (std::filesystem::exists("C:/Windows/Fonts/tahomabd.ttf"))
+            Rml::LoadFontFace("C:/Windows/Fonts/tahomabd.ttf");
+    }
+    else if (std::filesystem::exists("C:/Windows/Fonts/leelawui.ttf"))
+    {
+        Rml::LoadFontFace("C:/Windows/Fonts/leelawui.ttf", true);
+        if (std::filesystem::exists("C:/Windows/Fonts/leelauib.ttf"))
+            Rml::LoadFontFace("C:/Windows/Fonts/leelauib.ttf");
+    }
+#endif
 }
 } // namespace
 

@@ -50,6 +50,7 @@ private:
 
     RoleFonts m_primary{};
     std::array<RoleFonts, std::size(kBundledFallbackFonts)> m_fallbacks{};
+    RoleFonts m_systemThaiFallbacks{};
 };
 // SDL property of each role font: how many pixels higher its text is drawn so
 // that it sits where DejaVu Sans text would. The layout was tuned for DejaVu
