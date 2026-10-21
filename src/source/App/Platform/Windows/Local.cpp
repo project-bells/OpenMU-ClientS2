@@ -8,8 +8,12 @@ bool CheckSpecialText(wchar_t* Text)
 {
     for (auto* lpszCheck = (wchar_t*)Text; *lpszCheck; ++lpszCheck)
     {
-        if (!(48 <= *lpszCheck && *lpszCheck < 58) && !(65 <= *lpszCheck && *lpszCheck < 91) &&
-            !(97 <= *lpszCheck && *lpszCheck < 123))
+        // Keep the legacy ASCII restrictions for punctuation, but allow Unicode
+        // letters/digits (including Thai) so names can be entered in any locale.
+        // The server remains the authority for the final character-name policy.
+        if (*lpszCheck < 0x20 ||
+            (!(48 <= *lpszCheck && *lpszCheck < 58) && !(65 <= *lpszCheck && *lpszCheck < 91) &&
+             !(97 <= *lpszCheck && *lpszCheck < 123) && *lpszCheck < 0x80))
         {
             return true;
         }

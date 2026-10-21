@@ -204,6 +204,13 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
         break;
     }
 
+    // Origins has two fixed rooms.  Keep the wire indices unchanged while
+    // presenting stable names to players regardless of the old group label.
+    if (pServerInfo->m_iIndex == 1)
+        wcscpy_s(pServerInfo->m_bName, L"SV1-PVP");
+    else if (pServerInfo->m_iIndex == 2)
+        wcscpy_s(pServerInfo->m_bName, L"SV1-NONPVP");
+
     pServerGroup->InsertServerInfo(pServerInfo);
 }
 

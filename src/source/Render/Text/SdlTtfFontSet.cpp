@@ -13,11 +13,7 @@ namespace Render::Text
 {
 namespace
 {
-#ifdef NDEBUG
-inline constexpr bool kAllowSystemFontFallback = false;
-#else
 inline constexpr bool kAllowSystemFontFallback = true;
-#endif
 
 constexpr std::size_t RoleIndex(SdlTtfFontRole role)
 {
@@ -42,7 +38,6 @@ constexpr bool IsBoldRole(std::size_t role)
 
 [[nodiscard]] std::string FindDeveloperFontPath()
 {
-#ifndef NDEBUG
     static const char* const k_SystemFontPaths[] = {
 #ifdef __APPLE__
         "/System/Library/Fonts/Supplemental/Arial.ttf",
@@ -65,7 +60,6 @@ constexpr bool IsBoldRole(std::size_t role)
             return path;
         }
     }
-#endif
 
     return {};
 }
