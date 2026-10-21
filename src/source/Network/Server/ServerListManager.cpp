@@ -209,7 +209,7 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     if (pServerInfo->m_iIndex == 1)
         wcscpy_s(pServerInfo->m_bName, L"SV1-PVP");
     else if (pServerInfo->m_iIndex == 2)
-        wcscpy_s(pServerInfo->m_bName, L"SV1-NONPVP");
+        wcscpy_s(pServerInfo->m_bName, L"SV2-NONPVP");
 
     pServerGroup->InsertServerInfo(pServerInfo);
 }
