@@ -834,6 +834,10 @@ if (DOTNET_EXECUTABLE)
     set(DOTNET_PUBLISH_ENV
       "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
       "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
+      # MSBuild's culture-sensitive LastIndexOf can misparse RIDs such as
+      # win-x64 under Thai regional settings. NativeAOT output is culture
+      # independent, so use invariant globalization for a reproducible build.
+      "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1"
       "TEMP=${DOTNET_TEMP_DIR_NATIVE}"
       "TMP=${DOTNET_TEMP_DIR_NATIVE}"
     )
