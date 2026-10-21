@@ -139,7 +139,10 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
     if (NULL == pServerGroupInfo)
         return false;
 
-    ::wcscpy(pServerGroup->m_szName, pServerGroupInfo->m_szName);
+    // The stock ServerList.bmd still calls this group "Valhalla". Origins uses
+    // one branded group, so keep both the group button and login header stable
+    // without requiring every distributed client data pack to replace the BMD.
+    ::wcscpy_s(pServerGroup->m_szName, L"Origins");
     ::wcscpy(pServerGroup->m_szDescription, pServerGroupInfo->m_strDescript.c_str());
     pServerGroup->m_iSequence = (int)pServerGroupInfo->m_bySequence;
     pServerGroup->m_iWidthPos = (int)pServerGroupInfo->m_byPos;
