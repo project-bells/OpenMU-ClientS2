@@ -42,7 +42,8 @@ namespace
         20, 21, 22, 23, 24, 1687, 3150
     };
 
-    constexpr std::size_t kMinCharacterNameLength = 4;
+    constexpr std::size_t kMinCharacterNameLength = 3;
+    constexpr std::size_t kCharacterNameWireBytes = 10;
 
     constexpr int kSummonerDescriptionTextId = 1690;
     constexpr int kRageFighterDescriptionTextId = 3152;
@@ -418,8 +419,11 @@ void CCharMakeWin::RequestCreateCharacter()
     const std::wstring characterName = InputText[0];
 
     // todo: check with regex from server
+    const std::string characterNameUtf8 = StringUtils::WideToNarrow(characterName.c_str());
     if (characterName.length() < kMinCharacterNameLength)
         rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
+    else if (characterNameUtf8.size() > kCharacterNameWireBytes)
+        rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
     else if (::CheckName())
         rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);
     else if (CheckSpecialText(InputText[0]))
