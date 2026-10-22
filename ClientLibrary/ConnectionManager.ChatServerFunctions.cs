@@ -94,9 +94,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = ChatRoomClientJoinedRef.Length;
-                var packet = new ChatRoomClientJoinedRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new ChatRoomClientJoinedRef(packetData);
                 packet.ClientIndex = @clientIndex;
-                packet.Name = NativeInterop.PtrToWideString(@name);
+                Windows874Wire.Write(packetData.Slice(5, 10), NativeInterop.PtrToWideString(@name));
 
                 return length;
             });
@@ -161,9 +162,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = ChatRoomClientLeftRef.Length;
-                var packet = new ChatRoomClientLeftRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new ChatRoomClientLeftRef(packetData);
                 packet.ClientIndex = @clientIndex;
-                packet.Name = NativeInterop.PtrToWideString(@name);
+                Windows874Wire.Write(packetData.Slice(5, 10), NativeInterop.PtrToWideString(@name));
 
                 return length;
             });

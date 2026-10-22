@@ -150,6 +150,55 @@ int32_t CMultiLanguage::ConvertToUtf8(char* target, const wchar_t* source, int m
     return written > 0 ? (written - 1) : 0;
 }
 
+int32_t CMultiLanguage::ConvertFromWindows874(wchar_t* target, const char* source, int maxSourceLength)
+{
+    if (target == nullptr || source == nullptr)
+    {
+        return 0;
+    }
+
+    int length = 0;
+    if (maxSourceLength < 0)
+    {
+        length = static_cast<int>(std::strlen(source));
+    }
+    else
+    {
+        while (length < maxSourceLength && source[length] != '\0')
+        {
+            ++length;
+        }
+    }
+
+    for (int i = 0; i < length; ++i)
+    {
+        const auto value = static_cast<uint8_t>(source[i]);
+        if (value <= 0x7F)
+        {
+            target[i] = static_cast<wchar_t>(value);
+        }
+        else if (value >= 0xA1 && value <= 0xDA)
+        {
+            target[i] = static_cast<wchar_t>(0x0E01 + value - 0xA1);
+        }
+        else if (value == 0xDF)
+        {
+            target[i] = L'\u0E3F';
+        }
+        else if (value >= 0xE0 && value <= 0xFB)
+        {
+            target[i] = static_cast<wchar_t>(0x0E40 + value - 0xE0);
+        }
+        else
+        {
+            target[i] = L'\uFFFD';
+        }
+    }
+
+    target[length] = L'\0';
+    return length;
+}
+
 WPARAM CMultiLanguage::ConvertFulltoHalfWidthChar(DWORD wParam)
 {
     auto Char = (wchar_t)(wParam);

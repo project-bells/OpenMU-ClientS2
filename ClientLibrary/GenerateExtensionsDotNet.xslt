@@ -102,10 +102,27 @@ public unsafe partial class ConnectionManager
         throw new NotImplementedException()
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:text>;
+    <xsl:text>;</xsl:text>
+    <xsl:choose>
+      <xsl:when test="pd:Fields/pd:Field[pd:Type='String' and pd:Length = 10]">
+        <xsl:text>
+                var packetData = pipeWriter.GetSpan(length)[..length];
                 var packet = new </xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>
+                var packet = new </xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:apply-templates select="pd:Name" />
-    <xsl:text>Ref(pipeWriter.GetSpan(length)[..length]);</xsl:text>
+    <xsl:choose>
+      <xsl:when test="pd:Fields/pd:Field[pd:Type='String' and pd:Length = 10]">
+        <xsl:text>Ref(packetData);</xsl:text>
+      </xsl:when>
+      <xsl:otherwise>
+        <xsl:text>Ref(pipeWriter.GetSpan(length)[..length]);</xsl:text>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:if test="pd:Fields/pd:Field">
       <xsl:value-of select="$newline"/>
       <xsl:apply-templates select="pd:Fields/pd:Field" mode="assignment" />
@@ -218,6 +235,13 @@ public unsafe partial class ConnectionManager
         <xsl:text> = @</xsl:text>
         <xsl:call-template name="LowerCaseName" />
         <xsl:text> == 1;</xsl:text>
+      </xsl:when>
+      <xsl:when test="pd:Type='String' and pd:Length = 10">
+        <xsl:text>                Windows874Wire.Write(packetData.Slice(</xsl:text>
+        <xsl:value-of select="pd:Index"/>
+        <xsl:text>, 10), NativeInterop.PtrToWideString(@</xsl:text>
+        <xsl:call-template name="LowerCaseName" />
+        <xsl:text>));</xsl:text>
       </xsl:when>
       <xsl:when test="pd:Type='String'">
         <xsl:text>                packet.</xsl:text>

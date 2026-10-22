@@ -43,7 +43,7 @@ namespace
     };
 
     constexpr std::size_t kMinCharacterNameLength = 3;
-    constexpr std::size_t kCharacterNameWireBytes = 10;
+    constexpr std::size_t kCharacterNameWireCharacters = 10;
 
     constexpr int kSummonerDescriptionTextId = 1690;
     constexpr int kRageFighterDescriptionTextId = 3152;
@@ -419,10 +419,9 @@ void CCharMakeWin::RequestCreateCharacter()
     const std::wstring characterName = InputText[0];
 
     // todo: check with regex from server
-    const std::string characterNameUtf8 = StringUtils::WideToNarrow(characterName.c_str());
     if (characterName.length() < kMinCharacterNameLength)
         rUIMng.PopUpMsgWin(MESSAGE_MIN_LENGTH);
-    else if (characterNameUtf8.size() > kCharacterNameWireBytes)
+    else if (characterName.length() > kCharacterNameWireCharacters)
         rUIMng.PopUpMsgWin(MESSAGE_SPECIAL_NAME);
     else if (::CheckName())
         rUIMng.PopUpMsgWin(MESSAGE_ID_SPACE_ERROR);

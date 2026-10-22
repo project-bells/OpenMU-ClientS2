@@ -127,8 +127,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = PublicChatMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(NativeInterop.PtrToWideString(@message)!));
-                var packet = new PublicChatMessageRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Character = NativeInterop.PtrToWideString(@character);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new PublicChatMessageRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@character));
                 packet.Message = NativeInterop.PtrToWideString(@message);
 
                 return length;
@@ -163,8 +164,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = WhisperMessageRef.GetRequiredSize(Encoding.UTF8.GetByteCount(NativeInterop.PtrToWideString(@message)!));
-                var packet = new WhisperMessageRef(pipeWriter.GetSpan(length)[..length]);
-                packet.ReceiverName = NativeInterop.PtrToWideString(@receiverName);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new WhisperMessageRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@receiverName));
                 packet.Message = NativeInterop.PtrToWideString(@message);
 
                 return length;
@@ -539,9 +541,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = PlayerShopItemListRequestRef.Length;
-                var packet = new PlayerShopItemListRequestRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new PlayerShopItemListRequestRef(packetData);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                Windows874Wire.Write(packetData.Slice(6, 10), NativeInterop.PtrToWideString(@playerName));
 
                 return length;
             });
@@ -576,9 +579,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = PlayerShopItemBuyRequestRef.Length;
-                var packet = new PlayerShopItemBuyRequestRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new PlayerShopItemBuyRequestRef(packetData);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                Windows874Wire.Write(packetData.Slice(6, 10), NativeInterop.PtrToWideString(@playerName));
                 packet.ItemSlot = @itemSlot;
 
                 return length;
@@ -613,9 +617,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = PlayerShopCloseOtherRef.Length;
-                var packet = new PlayerShopCloseOtherRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new PlayerShopCloseOtherRef(packetData);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                Windows874Wire.Write(packetData.Slice(6, 10), NativeInterop.PtrToWideString(@playerName));
 
                 return length;
             });
@@ -3286,8 +3291,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = CreateCharacterRef.Length;
-                var packet = new CreateCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = NativeInterop.PtrToWideString(@name);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new CreateCharacterRef(packetData);
+                Windows874Wire.Write(packetData.Slice(4, 10), NativeInterop.PtrToWideString(@name));
                 packet.Class = @class_;
 
                 return length;
@@ -3322,8 +3328,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = DeleteCharacterRef.Length;
-                var packet = new DeleteCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = NativeInterop.PtrToWideString(@name);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new DeleteCharacterRef(packetData);
+                Windows874Wire.Write(packetData.Slice(4, 10), NativeInterop.PtrToWideString(@name));
                 packet.SecurityCode = NativeInterop.PtrToWideString(@securityCode);
 
                 return length;
@@ -3357,8 +3364,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = SelectCharacterRef.Length;
-                var packet = new SelectCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = NativeInterop.PtrToWideString(@name);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new SelectCharacterRef(packetData);
+                Windows874Wire.Write(packetData.Slice(4, 10), NativeInterop.PtrToWideString(@name));
 
                 return length;
             });
@@ -3391,8 +3399,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = FocusCharacterRef.Length;
-                var packet = new FocusCharacterRef(pipeWriter.GetSpan(length)[..length]);
-                packet.Name = NativeInterop.PtrToWideString(@name);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new FocusCharacterRef(packetData);
+                Windows874Wire.Write(packetData.Slice(4, 10), NativeInterop.PtrToWideString(@name));
 
                 return length;
             });
@@ -4206,9 +4215,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = LetterSendRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(NativeInterop.PtrToWideString(@message)!));
-                var packet = new LetterSendRequestRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new LetterSendRequestRef(packetData);
                 packet.LetterId = @letterId;
-                packet.Receiver = NativeInterop.PtrToWideString(@receiver);
+                Windows874Wire.Write(packetData.Slice(8, 10), NativeInterop.PtrToWideString(@receiver));
                 packet.Title = NativeInterop.PtrToWideString(@title);
                 packet.Rotation = @rotation;
                 packet.Animation = @animation;
@@ -4281,8 +4291,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = GuildKickPlayerRequestRef.GetRequiredSize(Encoding.UTF8.GetByteCount(NativeInterop.PtrToWideString(@securityCode)!));
-                var packet = new GuildKickPlayerRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new GuildKickPlayerRequestRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@playerName));
                 packet.SecurityCode = NativeInterop.PtrToWideString(@securityCode);
 
                 return length;
@@ -4626,10 +4637,11 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = GuildRoleAssignRequestRef.Length;
-                var packet = new GuildRoleAssignRequestRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new GuildRoleAssignRequestRef(packetData);
                 packet.Type = @type;
                 packet.Role = @role;
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                Windows874Wire.Write(packetData.Slice(5, 10), NativeInterop.PtrToWideString(@playerName));
 
                 return length;
             });
@@ -5002,8 +5014,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = FriendAddRequestRef.Length;
-                var packet = new FriendAddRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = NativeInterop.PtrToWideString(@friendName);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new FriendAddRequestRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@friendName));
 
                 return length;
             });
@@ -5036,8 +5049,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = FriendDeleteRef.Length;
-                var packet = new FriendDeleteRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = NativeInterop.PtrToWideString(@friendName);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new FriendDeleteRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@friendName));
 
                 return length;
             });
@@ -5070,8 +5084,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = ChatRoomCreateRequestRef.Length;
-                var packet = new ChatRoomCreateRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = NativeInterop.PtrToWideString(@friendName);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new ChatRoomCreateRequestRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@friendName));
 
                 return length;
             });
@@ -5105,9 +5120,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = FriendAddResponseRef.Length;
-                var packet = new FriendAddResponseRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new FriendAddResponseRef(packetData);
                 packet.Accepted = @accepted == 1;
-                packet.FriendRequesterName = NativeInterop.PtrToWideString(@friendRequesterName);
+                Windows874Wire.Write(packetData.Slice(4, 10), NativeInterop.PtrToWideString(@friendRequesterName));
 
                 return length;
             });
@@ -5176,8 +5192,9 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = ChatRoomInvitationRequestRef.Length;
-                var packet = new ChatRoomInvitationRequestRef(pipeWriter.GetSpan(length)[..length]);
-                packet.FriendName = NativeInterop.PtrToWideString(@friendName);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new ChatRoomInvitationRequestRef(packetData);
+                Windows874Wire.Write(packetData.Slice(3, 10), NativeInterop.PtrToWideString(@friendName));
                 packet.RoomId = @roomId;
                 packet.RequestId = @requestId;
 
@@ -6617,9 +6634,10 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = DuelStartRequestRef.Length;
-                var packet = new DuelStartRequestRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new DuelStartRequestRef(packetData);
                 packet.PlayerId = @playerId;
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                Windows874Wire.Write(packetData.Slice(6, 10), NativeInterop.PtrToWideString(@playerName));
 
                 return length;
             });
@@ -6654,10 +6672,11 @@ public unsafe partial class ConnectionManager
             connection.CreateAndSend(pipeWriter =>
             {
                 var length = DuelStartResponseRef.Length;
-                var packet = new DuelStartResponseRef(pipeWriter.GetSpan(length)[..length]);
+                var packetData = pipeWriter.GetSpan(length)[..length];
+                var packet = new DuelStartResponseRef(packetData);
                 packet.Response = @response == 1;
                 packet.PlayerId = @playerId;
-                packet.PlayerName = NativeInterop.PtrToWideString(@playerName);
+                Windows874Wire.Write(packetData.Slice(7, 10), NativeInterop.PtrToWideString(@playerName));
 
                 return length;
             });
