@@ -1,25 +1,17 @@
-using System.Text.Json;
-
 namespace Origins.Launcher;
 
 internal sealed class LauncherSettings
 {
-    public string ManifestUrl { get; set; } = "https://muorigins.online/client/manifest.json";
-    public string GameExecutable { get; set; } = "Main.exe";
-    public int ScanIntervalSeconds { get; set; } = 60;
-    public string[] BlockedProcesses { get; set; } = ["cheatengine", "cheatengine-x86_64", "ollydbg", "x64dbg", "x32dbg"];
+    public string ManifestUrl { get; } = "https://muorigins.online/client/manifest.json";
+    public string GameExecutable { get; } = "Main.exe";
+    public int ScanIntervalSeconds { get; } = 60;
+    public string[] BlockedProcesses { get; } = ["cheatengine", "cheatengine-x86_64", "ollydbg", "x64dbg", "x32dbg"];
 
     public static LauncherSettings Load(string directory)
     {
-        var path = Path.Combine(directory, "launcher.settings.json");
-        return File.Exists(path)
-            ? JsonSerializer.Deserialize<LauncherSettings>(File.ReadAllText(path)) ?? new()
-            : new();
+        // Production endpoints and guard policy are compiled into the signed launcher.
+        // Local JSON configuration is deliberately ignored to prevent redirection.
+        return new();
     }
 
-    public void Save(string directory)
-    {
-        var path = Path.Combine(directory, "launcher.settings.json");
-        File.WriteAllText(path, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
-    }
 }

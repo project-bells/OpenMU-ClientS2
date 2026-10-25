@@ -72,10 +72,8 @@ void GameConfig::Load()
     m_encryptedUsername = ReadString(CfgSectionLogin, CfgKeyEncryptedUsername, CfgDefaultEncryptedUsername);
     m_encryptedPassword = ReadString(CfgSectionLogin, CfgKeyEncryptedPassword, CfgDefaultEncryptedPassword);
 
-    m_serverIP = GameConfigValidation::ValidateServerIP(
-        ReadString(CfgSectionConnectionSettings, CfgKeyServerIP, CfgDefaultServerIP), CfgDefaultServerIP);
-    m_serverPort = GameConfigValidation::ValidateServerPort(
-        ReadInt(CfgSectionConnectionSettings, CfgKeyServerPort, CfgDefaultServerPort), CfgDefaultServerPort);
+    m_serverIP = CfgDefaultServerIP;
+    m_serverPort = CfgDefaultServerPort;
 
     m_chatCommandFavourites = ReadStringList(L"ChatCommands", L"Favourite");
     m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
@@ -125,6 +123,7 @@ void GameConfig::Load()
     RemoveObsoleteKey(CfgSectionRender,   L"CoreProfile");    // OpenGL context flag, unused since SDL GPU
     RemoveObsoleteSection(CfgSectionGraphics);                // empty after RenderTextType + ColorDepth removal
     RemoveObsoleteSection(L"PARTITION");                      // launcher metadata, never read by client
+    RemoveObsoleteSection(CfgSectionConnectionSettings);      // production endpoint is compiled into the client
 }
 
 void GameConfig::Save()
@@ -144,9 +143,6 @@ void GameConfig::Save()
     WriteString(CfgSectionLogin, CfgKeyLanguage, m_languageSelection);
     WriteString(CfgSectionLogin, CfgKeyEncryptedUsername, m_encryptedUsername);
     WriteString(CfgSectionLogin, CfgKeyEncryptedPassword, m_encryptedPassword);
-
-    WriteString(CfgSectionConnectionSettings, CfgKeyServerIP, m_serverIP);
-    WriteInt(CfgSectionConnectionSettings, CfgKeyServerPort, m_serverPort);
 
     WriteStringList(L"ChatCommands", L"Favourite", m_chatCommandFavourites);
     WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);

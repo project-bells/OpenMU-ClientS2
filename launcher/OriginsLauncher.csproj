@@ -9,8 +9,10 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <AssemblyName>OriginsLauncher</AssemblyName>
+    <ApplicationIcon>launcher-assets\origins-guard.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="launcher-assets\origins-guard.jpe" />
+    <EmbeddedResource Include="launcher-assets\origins-guard.ico" />
   </ItemGroup>
 </Project>

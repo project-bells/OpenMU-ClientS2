@@ -2062,20 +2062,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         g_bDisableAnimationTaskPool = false;
     }
 
-    // Check for command line server override
-    WORD wPortNumber;
-    if (GetConnectServerInfo(lpszCommandLine, g_lpszCmdURL, &wPortNumber))
-    {
-        szServerIpAddress = g_lpszCmdURL;
-        g_ServerPort = wPortNumber;
-    }
-    else
-    {
-        // Use config.ini settings if no command line override
-        static std::wstring serverIPFromConfig = GameConfig::GetInstance().GetServerIP();
-        szServerIpAddress = serverIPFromConfig.c_str();
-        g_ServerPort = GameConfig::GetInstance().GetServerPort();
-    }
+    // Origins production endpoint is intentionally compiled into the client.
+    // User settings and command-line arguments must never redirect the client.
+    static constexpr wchar_t originsServerHost[] = L"play.muorigins.online";
+    static constexpr WORD originsServerPort = 44406;
+    szServerIpAddress = originsServerHost;
+    g_ServerPort = originsServerPort;
 
     // #ifdef _DEBUG
 
