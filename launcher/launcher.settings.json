@@ -1,6 +1,6 @@
 {
   "manifestUrl": "https://muorigins.online/client/manifest.json",
-  "gameExecutable": "main.exe",
+  "gameExecutable": "Main.exe",
   "scanIntervalSeconds": 60,
   "blockedProcesses": [ "cheatengine", "cheatengine-x86_64", "ollydbg", "x64dbg", "x32dbg" ]
 }

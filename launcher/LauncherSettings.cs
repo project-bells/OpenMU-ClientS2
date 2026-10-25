@@ -5,7 +5,7 @@ namespace Origins.Launcher;
 internal sealed class LauncherSettings
 {
     public string ManifestUrl { get; set; } = "https://muorigins.online/client/manifest.json";
-    public string GameExecutable { get; set; } = "main.exe";
+    public string GameExecutable { get; set; } = "Main.exe";
     public int ScanIntervalSeconds { get; set; } = 60;
     public string[] BlockedProcesses { get; set; } = ["cheatengine", "cheatengine-x86_64", "ollydbg", "x64dbg", "x32dbg"];
 
@@ -15,5 +15,11 @@ internal sealed class LauncherSettings
         return File.Exists(path)
             ? JsonSerializer.Deserialize<LauncherSettings>(File.ReadAllText(path)) ?? new()
             : new();
+    }
+
+    public void Save(string directory)
+    {
+        var path = Path.Combine(directory, "launcher.settings.json");
+        File.WriteAllText(path, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
     }
 }

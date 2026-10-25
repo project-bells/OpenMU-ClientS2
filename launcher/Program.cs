@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 
@@ -14,26 +15,37 @@ internal static class Program
         ApplicationConfiguration.Initialize();
         var directory = AppContext.BaseDirectory;
         var settings = LauncherSettings.Load(directory);
-        using var form = new SplashForm(directory);
-        form.Shown += async (_, _) => await StartAsync(form, directory, settings);
+        using var form = new SplashForm(directory, settings);
+        form.Shown += async (_, _) => await PrepareAsync(form, directory, settings);
+        form.StartRequested += async (_, _) => await StartGameAsync(form, directory, settings);
         Application.Run(form);
     }
 
-    private static async Task StartAsync(SplashForm form, string directory, LauncherSettings settings)
+    private static async Task PrepareAsync(SplashForm form, string directory, LauncherSettings settings)
     {
         try
         {
             await UpdateAsync(form, directory, settings.ManifestUrl);
-            form.SetStatus("กำลังเริ่ม Origins Guard...", 100);
-            await GuardGameAsync(directory, settings, form);
+            form.SetReady();
         }
         catch (Exception exception)
         {
             MessageBox.Show(exception.Message, "Origins Launcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
-        finally
+    }
+
+    private static async Task StartGameAsync(SplashForm form, string directory, LauncherSettings settings)
+    {
+        try
         {
-            form.Close();
+            form.SetStatus("กำลังเริ่ม Origins Guard...", 100);
+            await GuardGameAsync(directory, settings, form);
+        }
+        catch (Exception exception)
+        {
+            form.Show();
+            form.SetReady();
+            MessageBox.Show(exception.Message, "Origins Launcher", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -41,7 +53,15 @@ internal static class Program
     {
         using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
         form.SetStatus("กำลังตรวจสอบอัปเดต...", 5);
-        var manifest = JsonSerializer.Deserialize<UpdateManifest>(await client.GetStringAsync(manifestUrl),
+        using var response = await client.GetAsync(manifestUrl);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            form.SetStatus("ยังไม่มีแพตช์บนเซิร์ฟเวอร์ กำลังเปิดเกม...", 90);
+            return;
+        }
+
+        response.EnsureSuccessStatusCode();
+        var manifest = JsonSerializer.Deserialize<UpdateManifest>(await response.Content.ReadAsStringAsync(),
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new InvalidDataException("Manifest ไม่ถูกต้อง");
         for (var index = 0; index < manifest.Files.Count; index++)
         {
@@ -67,20 +87,26 @@ internal static class Program
         var start = new ProcessStartInfo(executable) { WorkingDirectory = directory, UseShellExecute = false };
         start.Environment[GuardEnvironment] = Environment.ProcessId.ToString();
         using var game = Process.Start(start) ?? throw new InvalidOperationException("เปิดเกมไม่สำเร็จ");
+        var logPath = Path.Combine(directory, "OriginsGuard.log");
+        File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} guard-start game-pid={game.Id}{Environment.NewLine}");
         form.Hide();
+        form.ShowGuardNotification();
         while (!game.HasExited)
         {
             var blocked = Process.GetProcesses().FirstOrDefault(process =>
                 settings.BlockedProcesses.Contains(process.ProcessName, StringComparer.OrdinalIgnoreCase));
             if (blocked is not null)
             {
-                File.AppendAllText(Path.Combine(directory, "OriginsGuard.log"), $"{DateTimeOffset.Now:u} blocked={blocked.ProcessName}{Environment.NewLine}");
+                File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} blocked={blocked.ProcessName}{Environment.NewLine}");
                 game.Kill(true);
                 break;
             }
             await Task.Delay(TimeSpan.FromSeconds(Math.Max(10, settings.ScanIntervalSeconds)));
         }
         await game.WaitForExitAsync();
+        File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} guard-stop game-exit={game.ExitCode}{Environment.NewLine}");
+        form.HideGuardNotification();
+        form.Close();
     }
 
     private static string SafePath(string root, string relative)
