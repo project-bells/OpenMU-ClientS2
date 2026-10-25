@@ -1977,12 +1977,45 @@ static void InitializeWorkingDirectoryAndLog()
 }
 
 #ifdef _WIN32
+static bool IsStartedByOriginsGuard()
+{
+    wchar_t guardPidText[32]{};
+    if (GetEnvironmentVariableW(L"ORIGINS_GUARD_PID", guardPidText, static_cast<DWORD>(std::size(guardPidText))) == 0)
+    {
+        MessageBoxW(nullptr, L"Please start the game with OriginsLauncher.exe.", L"MU Origins", MB_OK | MB_ICONWARNING);
+        return false;
+    }
+
+    const DWORD guardPid = wcstoul(guardPidText, nullptr, 10);
+    HANDLE guard = OpenProcess(SYNCHRONIZE, FALSE, guardPid);
+    if (guard == nullptr)
+    {
+        return false;
+    }
+
+    std::thread([guard]
+    {
+        WaitForSingleObject(guard, INFINITE);
+        CloseHandle(guard);
+        TerminateProcess(GetCurrentProcess(), 0);
+    }).detach();
+    return true;
+}
+#endif
+
+#ifdef _WIN32
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 #else
 // Off Windows the Linux entry point (main.cpp) calls this directly.
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nCmdShow)
 #endif
 {
+#ifdef _WIN32
+    if (!IsStartedByOriginsGuard())
+    {
+        return 0;
+    }
+#endif
     InitializeWorkingDirectoryAndLog();
     // Installed before SDL starts so init failures are captured; every early
     // return restores it, and ShutdownRuntime() releases it before mu::log closes.
