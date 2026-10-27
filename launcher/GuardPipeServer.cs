@@ -13,6 +13,7 @@ internal sealed class GuardPipeServer : IAsyncDisposable
     private readonly string _logPath;
     private readonly CancellationTokenSource _shutdown = new();
     private long _lastSequence;
+    private long _lastValidHeartbeatUnixMilliseconds;
     private bool _disposed;
 
     public GuardPipeServer(string directory)
@@ -29,7 +30,16 @@ internal sealed class GuardPipeServer : IAsyncDisposable
 
     public string PipeName => _pipeName;
 
-    public DateTimeOffset LastValidHeartbeat { get; private set; } = DateTimeOffset.UtcNow;
+    public bool HasReceivedHeartbeat => Interlocked.Read(ref _lastValidHeartbeatUnixMilliseconds) != 0;
+
+    public DateTimeOffset LastValidHeartbeat
+    {
+        get
+        {
+            var milliseconds = Interlocked.Read(ref _lastValidHeartbeatUnixMilliseconds);
+            return milliseconds == 0 ? DateTimeOffset.MinValue : DateTimeOffset.FromUnixTimeMilliseconds(milliseconds);
+        }
+    }
 
     public Task RunAsync() => Task.Run(AcceptLoopAsync);
 
@@ -116,7 +126,7 @@ internal sealed class GuardPipeServer : IAsyncDisposable
         }
 
         Interlocked.Exchange(ref _lastSequence, sequence);
-        LastValidHeartbeat = DateTimeOffset.UtcNow;
+        Interlocked.Exchange(ref _lastValidHeartbeatUnixMilliseconds, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         Log($"heartbeat-ok seq={sequence} build={Safe(fields[2])} risk={Safe(fields[3])} codes={Safe(fields[4])}");
     }
 

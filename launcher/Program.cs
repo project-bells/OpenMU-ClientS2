@@ -12,6 +12,8 @@ internal static class Program
     private const string SessionKeyEnvironment = "ORIGINS_AC_KEY";
     private const string PipeEnvironment = "ORIGINS_AC_PIPE";
     private const string MainHashEnvironment = "ORIGINS_AC_MAIN_HASH";
+    private static readonly TimeSpan HeartbeatStartupGrace = TimeSpan.FromSeconds(120);
+    private static readonly TimeSpan HeartbeatTimeout = TimeSpan.FromSeconds(60);
 
     [STAThread]
     private static void Main()
@@ -99,6 +101,7 @@ internal static class Program
         using var game = Process.Start(start) ?? throw new InvalidOperationException("เปิดเกมไม่สำเร็จ");
         var logPath = Path.Combine(directory, "OriginsGuard.log");
         File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} guard-start game-pid={game.Id}{Environment.NewLine}");
+        var gameStartedAt = DateTimeOffset.UtcNow;
         form.Hide();
         form.ShowGuardNotification();
         while (!game.HasExited)
@@ -111,9 +114,16 @@ internal static class Program
                 game.Kill(true);
                 break;
             }
-            if (DateTimeOffset.UtcNow - heartbeatServer.LastValidHeartbeat > TimeSpan.FromSeconds(45))
+            var now = DateTimeOffset.UtcNow;
+            if (!heartbeatServer.HasReceivedHeartbeat && now - gameStartedAt > HeartbeatStartupGrace)
             {
-                File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} heartbeat-timeout{Environment.NewLine}");
+                File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} heartbeat-handshake-timeout grace-seconds={(int)HeartbeatStartupGrace.TotalSeconds}{Environment.NewLine}");
+                game.Kill(true);
+                break;
+            }
+            if (heartbeatServer.HasReceivedHeartbeat && now - heartbeatServer.LastValidHeartbeat > HeartbeatTimeout)
+            {
+                File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} heartbeat-timeout timeout-seconds={(int)HeartbeatTimeout.TotalSeconds}{Environment.NewLine}");
                 game.Kill(true);
                 break;
             }
