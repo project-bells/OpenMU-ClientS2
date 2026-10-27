@@ -58,9 +58,9 @@ internal sealed class SplashForm : Form
     private void LoadBrandAssets()
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var backgroundName = assembly.GetManifestResourceNames().First(n => n.EndsWith("origins-guard.jpe", StringComparison.OrdinalIgnoreCase));
+        var backgroundName = assembly.GetManifestResourceNames().First(n => n.EndsWith("aegis-launcher.jpe", StringComparison.OrdinalIgnoreCase));
         using (var stream = assembly.GetManifestResourceStream(backgroundName)!) BackgroundImage = new Bitmap(stream);
-        var iconName = assembly.GetManifestResourceNames().First(n => n.EndsWith("origins-guard.ico", StringComparison.OrdinalIgnoreCase));
+        var iconName = assembly.GetManifestResourceNames().First(n => n.EndsWith("aegis-icon.ico", StringComparison.OrdinalIgnoreCase));
         using var iconStream = assembly.GetManifestResourceStream(iconName)!;
         Icon = new Icon(iconStream); _guardIcon.Icon = new Icon(Icon, 32, 32);
     }

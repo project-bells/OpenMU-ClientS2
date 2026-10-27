@@ -14,15 +14,15 @@ body {
 	font-family: "token(font-body)";
 }
 
-/* RenderColorBitmap() at (320 - 102.4, 25), 204.8 x 102.4. */
-#logo { position: absolute; left: 34%; top: 5.2083%; width: 32%; height: 21.3333%; pointer-events: none; }
+/* Aegis-Mu square crest, centered above the login controls. */
+#logo { position: absolute; left: 42%; top: 3%; width: 16%; height: 21.3333%; pointer-events: none; }
 #logo-glow {
 	position: absolute;
 	left: 0;
 	top: 0;
 	width: 100%;
 	height: 100%;
-	decorator: additive-image(#ffffff ../../../../Logo/MU-logo_g.jpg);
+	decorator: additive-image(#ffffff ../../../../Logo/Aegis-Mu-Logo.jpe);
 }
 #logo-image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 
