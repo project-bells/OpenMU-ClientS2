@@ -7469,7 +7469,7 @@ void ReceiveGuildList(const BYTE* ReceiveBuffer)
     GuildTotalScore = std::max<int>(0, GuildTotalScore);
 
     wchar_t rivalGuildName[sizeof Data->szRivalGuildName + 1]{};
-    CMultiLanguage::ConvertFromUtf8(rivalGuildName, Data->szRivalGuildName, sizeof Data->szRivalGuildName);
+    CMultiLanguage::ConvertFromWindows874(rivalGuildName, Data->szRivalGuildName, sizeof Data->szRivalGuildName);
     UI::Guild::ResetMembers(rivalGuildName);
     for (int i = 0; i < Data->Count; i++)
     {
@@ -7607,7 +7607,7 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_WAR)ReceiveBuffer;
     memset(GuildWarName, 0, sizeof GuildWarName);
-    CMultiLanguage::ConvertFromUtf8(GuildWarName, Data->Name, 8);
+    CMultiLanguage::ConvertFromWindows874(GuildWarName, Data->Name, 8);
 
     wchar_t szChallengeText[128];
     mu_swprintf(szChallengeText, I18N::Game::SGuildChallengesYou, GuildWarName);
@@ -7675,7 +7675,7 @@ void ReceiveGuildBeginWar(const BYTE* ReceiveBuffer)
 
     wchar_t Text[100];
     memset(GuildWarName, 0, sizeof GuildWarName);
-    CMultiLanguage::ConvertFromUtf8(GuildWarName, Data->Name, 8);
+    CMultiLanguage::ConvertFromWindows874(GuildWarName, Data->Name, 8);
 
     if (Data->Type == 0)
     {
@@ -8026,7 +8026,7 @@ void ReceiveUnionViewportNotify(const BYTE* ReceiveBuffer)
     {
         auto pData2 = (LPPMSG_UNION_VIEWPORT_NOTIFY)(ReceiveBuffer + Offset);
         int nGuildMarkIndex = g_GuildCache.GetGuildMarkIndex(pData2->nGuildKey);
-        CMultiLanguage::ConvertFromUtf8(GuildMark[nGuildMarkIndex].UnionName, pData2->szUnionName, MAX_GUILDNAME);
+        CMultiLanguage::ConvertFromWindows874(GuildMark[nGuildMarkIndex].UnionName, pData2->szUnionName, MAX_GUILDNAME);
 
         int nCharKey = MAKEWORD(pData2->byKeyL, pData2->byKeyH);
 
@@ -8058,7 +8058,7 @@ void ReceiveUnionList(const BYTE* ReceiveBuffer)
             }
 
             wchar_t guildName[MAX_GUILDNAME + 1];
-            CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromWindows874(guildName, pData2->szGuildName, MAX_GUILDNAME);
 
             UI::Guild::AddAllianceGuild(std::span<const std::uint8_t, 64>(tmp), guildName, pData2->byMemberCount);
 
@@ -8076,8 +8076,8 @@ void ReceiveSoccerTime(const BYTE* ReceiveBuffer)
 void ReceiveSoccerScore(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SOCCER_SCORE)ReceiveBuffer;
-    CMultiLanguage::ConvertFromUtf8(SoccerTeamName[0], Data->Name1, MAX_GUILDNAME);
-    CMultiLanguage::ConvertFromUtf8(SoccerTeamName[1], Data->Name2, MAX_GUILDNAME);
+    CMultiLanguage::ConvertFromWindows874(SoccerTeamName[0], Data->Name1, MAX_GUILDNAME);
+    CMultiLanguage::ConvertFromWindows874(SoccerTeamName[1], Data->Name2, MAX_GUILDNAME);
     GuildWarScore[0] = Data->Score1;
     GuildWarScore[1] = Data->Score2;
 
@@ -10826,7 +10826,7 @@ void ReceiveBCStatus(const BYTE* ReceiveBuffer)
     {
         wchar_t ownerGuild[MAX_GUILDNAME + 1]{};
         wchar_t ownerGuildMaster[MAX_USERNAME_SIZE + 1]{};
-        CMultiLanguage::ConvertFromUtf8(ownerGuild, Data->cOwnerGuild, MAX_GUILDNAME);
+        CMultiLanguage::ConvertFromWindows874(ownerGuild, Data->cOwnerGuild, MAX_GUILDNAME);
         CMultiLanguage::ConvertFromWindows874(ownerGuildMaster, Data->cOwnerGuildMaster, MAX_USERNAME_SIZE);
         UI::Siege::GuardStatus status{
             static_cast<CASTLESIEGE_STATE>(Data->cCastleSiegeState),
@@ -11226,7 +11226,7 @@ void ReceiveBCDeclareGuildList(const BYTE* ReceiveBuffer)
             *pMarkCount++ = pData2->btRegMarks1;
 
             wchar_t guildName[MAX_GUILDNAME + 1]{};
-            CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromWindows874(guildName, pData2->szGuildName, MAX_GUILDNAME);
             guilds.push_back({guildName, static_cast<int>(dwMarkCount),
                               pData2->btIsGiveUp != 0, pData2->btSeqNum});
 
@@ -11255,7 +11255,7 @@ void ReceiveBCGuildList(const BYTE* ReceiveBuffer)
         {
             auto pData2 = (LPPMSG_CSATTKGUILDLIST)(ReceiveBuffer + Offset);
             wchar_t guildName[MAX_GUILDNAME + 1]{};
-            CMultiLanguage::ConvertFromUtf8(guildName, pData2->szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromWindows874(guildName, pData2->szGuildName, MAX_GUILDNAME);
 
             guilds.push_back({guildName, pData2->btCsJoinSide,
                               pData2->btGuildInvolved, pData2->iGuildScore});
@@ -11510,14 +11510,14 @@ bool Check_Switch(PRECEIVE_CROWN_SWITCH_INFO* Data)
         {
             Switch_Info[0].m_bySwitchState = Data->m_bySwitchState;
             Switch_Info[0].m_JoinSide = Data->m_JoinSide;
-            CMultiLanguage::ConvertFromUtf8(Switch_Info[0].m_szGuildName, Data->m_szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromWindows874(Switch_Info[0].m_szGuildName, Data->m_szGuildName, MAX_GUILDNAME);
             CMultiLanguage::ConvertFromWindows874(Switch_Info[0].m_szUserName, Data->m_szUserName, MAX_USERNAME_SIZE);
         }
         else
         {
             Switch_Info[1].m_bySwitchState = Data->m_bySwitchState;
             Switch_Info[1].m_JoinSide = Data->m_JoinSide;
-            CMultiLanguage::ConvertFromUtf8(Switch_Info[1].m_szGuildName, Data->m_szGuildName, MAX_GUILDNAME);
+            CMultiLanguage::ConvertFromWindows874(Switch_Info[1].m_szGuildName, Data->m_szGuildName, MAX_GUILDNAME);
             CMultiLanguage::ConvertFromWindows874(Switch_Info[1].m_szUserName, Data->m_szUserName, MAX_USERNAME_SIZE);
         }
     }
@@ -11550,7 +11550,7 @@ void ReceiveBattleCastleProcess(const BYTE* ReceiveBuffer)
     auto pData = (LPPRECEIVE_BC_PROCESS)ReceiveBuffer;
 
     wchar_t guildName[MAX_GUILDNAME + 1];
-    CMultiLanguage::ConvertFromUtf8(guildName, pData->m_szGuildName, MAX_GUILDNAME);
+    CMultiLanguage::ConvertFromWindows874(guildName, pData->m_szGuildName, MAX_GUILDNAME);
 
     switch (pData->m_byBasttleCastleState)
     {

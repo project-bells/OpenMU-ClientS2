@@ -36,6 +36,31 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
+namespace
+{
+// C1 chat packets have a one-byte packet length. After the 13-byte header and
+// sender fields plus the terminating zero, 241 UTF-8 bytes remain. Character
+// count alone is insufficient because Thai text normally uses three bytes per
+// code point.
+constexpr int kMaximumChatUtf8Bytes = 241;
+
+void TruncateToUtf8ByteLimit(std::wstring& text, int maximumBytes)
+{
+    while (!text.empty())
+    {
+        const int byteCount = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text.data(),
+                                                   static_cast<int>(text.size()), nullptr, 0, nullptr, nullptr);
+        if (byteCount > 0 && byteCount <= maximumBytes)
+            return;
+
+        text.pop_back();
+        // Do not leave an unmatched UTF-16 high surrogate at the end.
+        if (!text.empty() && text.back() >= 0xD800 && text.back() <= 0xDBFF)
+            text.pop_back();
+    }
+}
+} // namespace
+
 mu::ui::window::CChatInputBox::CChatInputBox()
 {
     Init();
@@ -344,6 +369,7 @@ bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
             }
         }
         wstrText.append(szChatText);
+        TruncateToUtf8ByteLimit(wstrText, kMaximumChatUtf8Bytes);
 
         if (wcslen(szChatText) != 0)
         {
