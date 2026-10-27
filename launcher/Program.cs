@@ -8,6 +8,10 @@ namespace Origins.Launcher;
 internal static class Program
 {
     private const string GuardEnvironment = "ORIGINS_GUARD_PID";
+    private const string SessionEnvironment = "ORIGINS_AC_SESSION";
+    private const string SessionKeyEnvironment = "ORIGINS_AC_KEY";
+    private const string PipeEnvironment = "ORIGINS_AC_PIPE";
+    private const string MainHashEnvironment = "ORIGINS_AC_MAIN_HASH";
 
     [STAThread]
     private static void Main()
@@ -84,8 +88,14 @@ internal static class Program
     {
         var executable = SafePath(directory, settings.GameExecutable);
         if (!File.Exists(executable)) throw new FileNotFoundException("ไม่พบ main.exe", executable);
+        await using var heartbeatServer = new GuardPipeServer(directory);
+        var heartbeatTask = heartbeatServer.RunAsync();
         var start = new ProcessStartInfo(executable) { WorkingDirectory = directory, UseShellExecute = false };
         start.Environment[GuardEnvironment] = Environment.ProcessId.ToString();
+        start.Environment[SessionEnvironment] = heartbeatServer.SessionId;
+        start.Environment[SessionKeyEnvironment] = heartbeatServer.EncodedKey;
+        start.Environment[PipeEnvironment] = heartbeatServer.PipeName;
+        start.Environment[MainHashEnvironment] = await HashAsync(executable);
         using var game = Process.Start(start) ?? throw new InvalidOperationException("เปิดเกมไม่สำเร็จ");
         var logPath = Path.Combine(directory, "OriginsGuard.log");
         File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} guard-start game-pid={game.Id}{Environment.NewLine}");
@@ -101,9 +111,17 @@ internal static class Program
                 game.Kill(true);
                 break;
             }
-            await Task.Delay(TimeSpan.FromSeconds(Math.Max(10, settings.ScanIntervalSeconds)));
+            if (DateTimeOffset.UtcNow - heartbeatServer.LastValidHeartbeat > TimeSpan.FromSeconds(45))
+            {
+                File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} heartbeat-timeout{Environment.NewLine}");
+                game.Kill(true);
+                break;
+            }
+            await Task.Delay(TimeSpan.FromSeconds(Math.Min(10, Math.Max(2, settings.ScanIntervalSeconds))));
         }
         await game.WaitForExitAsync();
+        await heartbeatServer.DisposeAsync();
+        try { await heartbeatTask; } catch (OperationCanceledException) { }
         File.AppendAllText(logPath, $"{DateTimeOffset.Now:u} guard-stop game-exit={game.ExitCode}{Environment.NewLine}");
         form.HideGuardNotification();
         form.Close();

@@ -12,6 +12,7 @@
 //------------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "AntiCheat/ClientAntiCheat.h"
 #include "PacketFunctions_CommonEnums.h"
 #include "PacketFunctions_ClientToServer_Enums.h"
 #include "PacketFunctions_ClientToServer.h"
@@ -1120,6 +1121,7 @@ void PacketFunctions_ClientToServer::SendAddMasterSkillPoint(uint16_t skillId)
 
 void PacketFunctions_ClientToServer::SendHitRequest(uint16_t targetId, BYTE attackAnimation, BYTE lookingDirection)
 {
+    Origins::AntiCheat::ClientAntiCheat::Instance().RecordAttack();
     static const auto dotnet_SendHitRequest = LoadManagedSymbol<::SendHitRequest>("SendHitRequest");
     if (!dotnet_SendHitRequest)
     {
@@ -1208,6 +1210,7 @@ void PacketFunctions_ClientToServer::SendAreaSkill095(BYTE skillIndex, BYTE targ
 
 void PacketFunctions_ClientToServer::SendRageAttackRequest(uint16_t skillId, uint16_t targetId)
 {
+    Origins::AntiCheat::ClientAntiCheat::Instance().RecordAttack();
     static const auto dotnet_SendRageAttackRequest = LoadManagedSymbol<::SendRageAttackRequest>("SendRageAttackRequest");
     if (!dotnet_SendRageAttackRequest)
     {
@@ -1219,6 +1222,7 @@ void PacketFunctions_ClientToServer::SendRageAttackRequest(uint16_t skillId, uin
 
 void PacketFunctions_ClientToServer::SendRageAttackRangeRequest(uint16_t skillId, uint16_t targetId)
 {
+    Origins::AntiCheat::ClientAntiCheat::Instance().RecordAttack();
     static const auto dotnet_SendRageAttackRangeRequest = LoadManagedSymbol<::SendRageAttackRangeRequest>("SendRageAttackRangeRequest");
     if (!dotnet_SendRageAttackRangeRequest)
     {

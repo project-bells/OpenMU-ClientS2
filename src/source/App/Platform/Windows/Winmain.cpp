@@ -7,6 +7,7 @@
 #include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
+#include "AntiCheat/ClientAntiCheat.h"
 #include "Core/Text/Utf8.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
@@ -942,6 +943,12 @@ void RecordCpuUsage()
 
     while (!Destroy)
     {
+        if (!Origins::AntiCheat::ClientAntiCheat::Instance().Tick())
+        {
+            Destroy = true;
+            continue;
+        }
+
         double currentUsage = CpuUsage::Instance()->GetUsage() * 100.0;
 
         currentUsage = std::clamp(currentUsage, 0.0, 100.0);
@@ -2017,6 +2024,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 #endif
     InitializeWorkingDirectoryAndLog();
+    if (!Origins::AntiCheat::ClientAntiCheat::Instance().Initialize())
+    {
+#ifdef _WIN32
+        MessageBoxW(nullptr, L"Origins Anti-Cheat secure session failed.", L"MU Origins", MB_OK | MB_ICONERROR);
+#endif
+        return 0;
+    }
     // Installed before SDL starts so init failures are captured; every early
     // return restores it, and ShutdownRuntime() releases it before mu::log closes.
     std::optional<Core::Log::Sdl::ScopedLogOutput> sdlLogOutput;
