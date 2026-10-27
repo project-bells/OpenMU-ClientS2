@@ -19,6 +19,14 @@ src/bin/Data/Effects/*.json text eol=lf
 # The creation baseline of the effect recorder is compared line by line on every platform.
 tests/effects/baseline/*.txt text eol=lf
 
+# Store future vendor binaries and distributable archives in Git LFS. This is
+# intentionally forward-only: existing history is not migrated or rewritten.
+*.[Ll][Ii][Bb] filter=lfs diff=lfs merge=lfs -text
+*.[Aa]         filter=lfs diff=lfs merge=lfs -text
+*.[Zz][Ii][Pp] filter=lfs diff=lfs merge=lfs -text
+*.[77][Zz]     filter=lfs diff=lfs merge=lfs -text
+*.[Rr][Aa][Rr] filter=lfs diff=lfs merge=lfs -text
+
 # Binary game assets: never apply text detection or EOL normalization.
 # Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`
 # misdetects them as text; on a Windows clone (core.autocrlf=true) their lone

@@ -72,6 +72,19 @@ src/bin/Data/Items/**/*.tmp
 
 **/*.log
 
+# IDE databases and native linker/compiler intermediates must never be
+# committed. Large instances of these files exist in old history; cleanup is
+# forward-only and deliberately does not rewrite published commits.
+**/*.VC.db
+**/*.ipch
+**/*.ilk
+**/*.pdb
+**/Browse.VC.db
+
+# Legacy GameServer runtime logs bundled in the upstream history.
+/MuServer_Season_5_Update_15/GameServer/LOG/*.txt
+/Source MuServer Update 15/**/LOG/*.txt
+
 # macOS metadata
 .DS_Store
 **/.DS_Store
